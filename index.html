@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>مرکز بازی‌ها</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .page {
+            display: none;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.02);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+            padding: 15px 25px;
+            border-radius: 60px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: white;
+        }
+
+        .avatar {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .game-card {
+            background: rgba(255,255,255,0.15);
+            border-radius: 25px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.25);
+        }
+
+        .game-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .game-card h3 {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .game-card p {
+            color: rgba(255,255,255,0.7);
+            font-size: 11px;
+        }
+
+        .coins {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            padding: 5px 15px;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 550px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            .user-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- صفحه ورود -->
+<div id="loginPage" class="page active">
+    <div class="card">
+        <div class="card-title">🔐 ورود</div>
+        <div class="form-group">
+            <input type="text" id="loginUsername" placeholder="نام کاربری">
+        </div>
+        <div class="form-group">
+            <input type="password" id="loginPassword" placeholder="رمز عبور">
+        </div>
+        <button class="btn" onclick="login()">ورود</button>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="#" onclick="showRegister()" style="color: white;">ثبت‌نام نکرده‌اید؟ عضویت</a>
+        </div>
+    </div>
+</div>
+
+<!-- صفحه ثبت‌نام -->
+<div id="registerPage" class="page">
+    <div class="card">
+        <div class="card-title">📝 ثبت‌نام</div>
+        <div class="form-group">
+            <input type="text" id="regName" placeholder="نام کامل">
+        </div>
+        <div class="form-group">
+            <input type="text" id="regUsername" placeholder="نام کاربری">
+        </div>
+        <div class="form-group">
+            <input type="password" id="regPassword" placeholder="رمز عبور">
+        </div>
+        <div class="form-group">
+            <input type="email" id="regEmail" placeholder="ایمیل (اختیاری)">
+        </div>
+        <button class="btn" onclick="register()">ثبت‌نام</button>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="#" onclick="showLogin()" style="color: white;">قبلاً ثبت‌نام کرده‌اید؟ ورود</a>
+        </div>
+    </div>
+</div>
+
+<!-- صفحه اصلی -->
+<div id="mainPage" class="page">
+    <div class="user-header">
+        <div class="user-info">
+            <div class="avatar" id="userAvatar">🎮</div>
+            <div>
+                <div id="userName" style="font-size: 18px; font-weight: bold;">کاربر</div>
+                <div class="coins" id="userCoins">🪙 0 سکه</div>
+            </div>
+        </div>
+        <button class="btn btn-danger" onclick="logout()" style="width: auto; padding: 8px 20px;">🚪 خروج</button>
+    </div>
+
+    <div class="card">
+        <div class="card-title">🎮 انتخاب بازی</div>
+        <div class="games-grid">
+            <div class="game-card" onclick="startFlappy()">
+                <div class="game-icon">🐦</div>
+                <h3>فلاپی برد</h3>
+                <p>تک نفره | چند نفره آفلاین | فروشگاه</p>
+            </div>
+            <div class="game-card" onclick="startNinja()">
+                <div class="game-icon">🥷</div>
+                <h3>نینجا</h3>
+                <p>بازی پلتفرمر | ماجراجویی | جمع‌آوری سکه</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentUser = null;
+    let users = [];
+
+    function loadData() {
+        let savedUsers = localStorage.getItem('flappy_users');
+        if (savedUsers) {
+            users = JSON.parse(savedUsers);
+        } else {
+            users = [
+                { id: 1, name: 'مدیر', username: 'admin', password: '123', email: '', coins: 500 }
+            ];
+            saveData();
+        }
+        
+        let savedUser = localStorage.getItem('flappy_currentUser');
+        if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem('flappy_users', JSON.stringify(users));
+        if (currentUser) {
+            localStorage.setItem('flappy_currentUser', JSON.stringify(currentUser));
+        }
+    }
+
+    function login() {
+        let username = document.getElementById('loginUsername').value.trim();
+        let password = document.getElementById('loginPassword').value;
+        
+        let user = users.find(u => u.username === username && u.password === password);
+        
+        if (user) {
+            currentUser = JSON.parse(JSON.stringify(user));
+            saveData();
+            updateMainUI();
+            showMain();
+        } else {
+            alert('نام کاربری یا رمز عبور اشتباه است!');
+        }
+    }
+
+    function register() {
+        let name = document.getElementById('regName').value.trim();
+        let username = document.getElementById('regUsername').value.trim();
+        let password = document.getElementById('regPassword').value;
+        let email = document.getElementById('regEmail').value.trim();
+        
+        if (!name || !username || !password) {
+            alert('لطفاً همه فیلدهای ضروری را پر کنید!');
+            return;
+        }
+        
+        if (users.find(u => u.username === username)) {
+            alert('این نام کاربری قبلاً ثبت شده است!');
+            return;
+        }
+        
+        let newUser = {
+            id: Date.now(),
+            name: name,
+            username: username,
+            password: password,
+            email: email,
+            coins: 100
+        };
+        
+        users.push(newUser);
+        currentUser = newUser;
+        saveData();
+        updateMainUI();
+        showMain();
+    }
+
+    function logout() {
+        currentUser = null;
+        localStorage.removeItem('flappy_currentUser');
+        showLogin();
+    }
+
+    function showLogin() {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('loginPage').classList.add('active');
+        document.getElementById('loginUsername').value = '';
+        document.getElementById('loginPassword').value = '';
+    }
+
+    function showRegister() {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('registerPage').classList.add('active');
+    }
+
+    function showMain() {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('mainPage').classList.add('active');
+        updateMainUI();
+    }
+
+    function updateMainUI() {
+        if (currentUser) {
+            document.getElementById('userName').innerHTML = currentUser.name;
+            document.getElementById('userCoins').innerHTML = `🪙 ${currentUser.coins} سکه`;
+            document.getElementById('userAvatar').innerHTML = '🎮';
+        }
+    }
+
+    function startFlappy() {
+        if (!currentUser) {
+            alert('لطفاً ابتدا وارد شوید!');
+            return;
+        }
+        localStorage.setItem('flappy_currentUser', JSON.stringify(currentUser));
+        window.location.href = 'flappy.html';
+    }
+
+    function startNinja() {
+        if (!currentUser) {
+            alert('لطفاً ابتدا وارد شوید!');
+            return;
+        }
+        localStorage.setItem('flappy_currentUser', JSON.stringify(currentUser));
+        window.location.href = 'ninja.html';
+    }
+
+    loadData();
+    if (currentUser) {
+        showMain();
+    } else {
+        showLogin();
+    }
+</script>
+
+</body>
+</html>
