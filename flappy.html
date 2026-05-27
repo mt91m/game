@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>فلاپی برد | لیگ + فروشگاه + لیدربورد</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Tahoma', 'Segoe UI', Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: #000;
+            border-radius: 20px;
+            padding: 10px;
+            display: inline-block;
+        }
+
+        canvas {
+            display: block;
+            border-radius: 12px;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .tab-page {
+            display: none;
+        }
+
+        .tab-page.active {
+            display: block;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .back-btn {
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        .score-panel {
+            display: flex;
+            gap: 20px;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: white;
+        }
+
+        .mode-selector {
+            background: rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .mode-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .mode-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .shop-item {
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .color-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+        }
+
+        .shop-item button {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .equipped-badge {
+            color: #2ecc71;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        .leaderboard-list {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-list li {
+            color: white;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .leaderboard-list li:nth-child(1) { background: rgba(255,215,0,0.3); }
+        .leaderboard-list li:nth-child(2) { background: rgba(192,192,192,0.3); }
+        .leaderboard-list li:nth-child(3) { background: rgba(205,127,50,0.3); }
+
+        .controls-info {
+            font-size: 12px;
+            color: white;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .winner-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 100;
+            display: none;
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            80% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .bg-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .bg-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .bg-option.selected {
+            border-color: white;
+            transform: scale(1.1);
+        }
+
+        .save-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .save-area input {
+            padding: 10px 15px;
+            border-radius: 30px;
+            border: none;
+            width: 60%;
+        }
+
+        .save-area button {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        .info-text {
+            color: rgba(255,255,255,0.6);
+            font-size: 11px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* پروفایل کاربر */
+        .user-profile {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 20px;
+            color: white;
+            flex-wrap: wrap;
+        }
+
+        .user-stats div {
+            text-align: center;
+        }
+
+        .user-stats .value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .league-badge {
+            background: linear-gradient(135deg, gold, #f39c12);
+            padding: 5px 15px;
+            border-radius: 30px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .reward-message {
+            position: fixed;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 100;
+            display: none;
+            animation: bounce 0.5s ease;
+            text-align: center;
+            white-space: pre-line;
+        }
+
+        /* راهنما */
+        .help-section {
+            background: rgba(0,0,0,0.6);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 15px;
+            color: white;
+            font-size: 12px;
+        }
+
+        .help-section h4 {
+            margin-bottom: 10px;
+            color: #f39c12;
+        }
+
+        .help-section ul {
+            padding-right: 20px;
+        }
+
+        .help-section li {
+            margin: 5px 0;
+        }
+
+        .help-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .league-help {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .league-help-item {
+            background: rgba(255,255,255,0.1);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <!-- تب‌ها -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('game')">🎮 بازی</button>
+        <button class="tab-btn" onclick="showTab('shop')">🛒 فروشگاه</button>
+        <button class="tab-btn" onclick="showTab('leaderboard')">🏆 لیدربورد</button>
+        <button class="tab-btn" onclick="showTab('help')">❓ راهنما</button>
+    </div>
+
+    <!-- تب بازی -->
+    <div id="gameTab" class="tab-page active">
+        <!-- پروفایل کاربر + لیگ -->
+        <div class="user-profile" id="userProfile">
+            <div class="user-stats">
+                <div>
+                    <div class="value" id="userHighScore">0</div>
+                    <div style="font-size:11px">بهترین امتیاز</div>
+                </div>
+                <div>
+                    <div class="value" id="userCoinsProfile">0</div>
+                    <div style="font-size:11px">سکه‌ها</div>
+                </div>
+                <div>
+                    <div class="value" id="userTotalScore">0</div>
+                    <div style="font-size:11px">مجموع امتیاز</div>
+                </div>
+            </div>
+            <div class="league-badge" id="leagueBadge">🥉 برنز</div>
+        </div>
+
+        <div class="game-header">
+            <button class="back-btn" onclick="backToHub()">← بازگشت</button>
+            <div class="score-panel" id="scorePanel"></div>
+        </div>
+
+        <div class="mode-selector">
+            <div style="color:white; margin-bottom:8px">🎮 انتخاب حالت بازی</div>
+            <div class="mode-buttons">
+                <button class="mode-btn" data-mode="single">🎯 تک نفره</button>
+                <button class="mode-btn" data-mode="multi2">👥 2 نفره</button>
+                <button class="mode-btn" data-mode="multi3">👥👤 3 نفره</button>
+                <button class="mode-btn" data-mode="multi4">👥👥 4 نفره</button>
+            </div>
+        </div>
+
+        <div class="bg-selector" id="bgSelector">
+            <div class="bg-option" data-bg="day" style="background: linear-gradient(135deg, #4A90E2, #7FDBDA);"></div>
+            <div class="bg-option" data-bg="night" style="background: linear-gradient(135deg, #0a0a2a, #1a1a3e);"></div>
+            <div class="bg-option" data-bg="sunset" style="background: linear-gradient(135deg, #e74c3c, #f39c12);"></div>
+            <div class="bg-option" data-bg="forest" style="background: linear-gradient(135deg, #1e8449, #2ecc71);"></div>
+        </div>
+
+        <div class="game-container">
+            <canvas id="gameCanvas" width="500" height="600" style="width:100%; height:auto; max-width:500px"></canvas>
+        </div>
+
+        <div class="controls-info" id="controlsInfo"></div>
+    </div>
+
+    <!-- تب فروشگاه -->
+    <div id="shopTab" class="tab-page">
+        <div class="game-header">
+            <button class="back-btn" onclick="showTab('game')">← بازگشت</button>
+            <div class="score-panel">🪙 <span id="shopCoins">0</span> سکه</div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.1); border-radius: 20px; padding: 20px;">
+            <div style="color:white; font-size:18px; margin-bottom:15px; text-align:center">🎨 رنگ پرنده‌ها</div>
+            <div class="shop-items" id="colorShop"></div>
+            
+            <div style="color:white; font-size:18px; margin: 20px 0 15px; text-align:center">🎀 اکسسوری‌ها</div>
+            <div class="shop-items" id="accessoryShop"></div>
+        </div>
+    </div>
+
+    <!-- تب لیدربورد -->
+    <div id="leaderboardTab" class="tab-page">
+        <div class="game-header">
+            <button class="back-btn" onclick="showTab('game')">← بازگشت</button>
+            <div class="score-panel">🏆 رکوردها</div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.1); border-radius: 20px; padding: 20px;">
+            <div style="color:white; font-size:18px; margin-bottom:15px; text-align:center">🏆 لیدربورد محلی (بهترین امتیاز هر بازیکن)</div>
+            <ul class="leaderboard-list" id="localLeaderboardList">
+                <li style="justify-content:center">در حال بارگذاری...</li>
+            </ul>
+            
+            <div class="save-area">
+                <input type="text" id="saveScoreName" placeholder="نام خود را وارد کنید" maxlength="15">
+                <button onclick="saveLocalScore()">💾 ذخیره بهترین امتیاز</button>
+            </div>
+            <div class="info-text">* فقط بالاترین امتیاز هر نفر ذخیره می‌شود</div>
+        </div>
+    </div>
+
+    <!-- تب راهنما -->
+    <div id="helpTab" class="tab-page">
+        <div class="game-header">
+            <button class="back-btn" onclick="showTab('game')">← بازگشت</button>
+            <div class="score-panel">❓ راهنما</div>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.1); border-radius: 20px; padding: 20px;">
+            <div class="help-section">
+                <h4>🎮 نحوه بازی</h4>
+                <ul>
+                    <li>🖱️ با کلیک موس یا دکمه Space پرنده پرواز می‌کند</li>
+                    <li>🎯 از بین لوله‌ها عبور کنید</li>
+                    <li>💀 برخورد با لوله یا زمین = پایان بازی</li>
+                    <li>⭐ هر لوله = 1 امتیاز = 1 سکه</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h4>🏆 سیستم لیگ</h4>
+                <div style="font-size:12px; margin-bottom:10px">لیگ بر اساس <strong>مجموع کل امتیازات</strong> شما تعیین می‌شود (همه بازی‌ها با هم جمع می‌شوند)</div>
+                <div class="league-help" id="leagueHelpList"></div>
+                <div style="font-size:11px; margin-top:10px">🎁 هر بار لیگ بالاتر بروید، پاداش سکه دریافت می‌کنید!</div>
+            </div>
+
+            <div class="help-section">
+                <h4>👥 حالت چند نفره</h4>
+                <ul>
+                    <li>2-4 نفره روی یک کیبورد</li>
+                    <li>بازیکن 1: Space &nbsp;&nbsp; بازیکن 2: A &nbsp;&nbsp; بازیکن 3: S &nbsp;&nbsp; بازیکن 4: D</li>
+                    <li>⚠️ امتیاز چند نفره در لیگ و لیدربورد محلی حساب نمی‌شود</li>
+                </ul>
+            </div>
+
+            <div class="help-section">
+                <h4>🛒 فروشگاه</h4>
+                <ul>
+                    <li>با سکه‌هایی که از بازی به دست می‌آورید، رنگ و اکسسوری بخرید</li>
+                    <li>هر امتیاز = 1 سکه</li>
+                    <li>صعود به لیگ بالاتر = پاداش سکه</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="winnerMessage" class="winner-message"></div>
+<div id="rewardMessage" class="reward-message"></div>
+
+<script>
+    // ==================== تنظیمات ====================
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const W = 500, H = 600;
+    canvas.width = W;
+    canvas.height = H;
+    
+    const GRAVITY = 0.4;
+    const JUMP_POWER = -6.5;
+    const PIPE_W = 52;
+    const PIPE_GAP = 140;
+    const PIPE_SPACING = 200;
+    const PIPE_SPEED = 2;
+    const GROUND_Y = H - 55;
+    
+    // ==================== لیگ‌ها ====================
+    const leagues = [
+        { id: 'bronze', name: '🥉 برنز', minScore: 0, maxScore: 50, color: '#cd7f32', bg: 'day', reward: 0 },
+        { id: 'silver', name: '🥈 نقره', minScore: 51, maxScore: 100, color: '#c0c0c0', bg: 'forest', reward: 50 },
+        { id: 'gold', name: '🥇 طلا', minScore: 101, maxScore: 150, color: '#ffd700', bg: 'sunset', reward: 100 },
+        { id: 'platinum', name: '💎 پلاتین', minScore: 151, maxScore: 200, color: '#e5e4e2', bg: 'night', reward: 150 },
+        { id: 'diamond', name: '🔷 الماس', minScore:201, maxScore: 250, color: '#b9f2ff', bg: 'day', reward: 200 },
+        { id: 'master', name: '👑 استاد', minScore: 251, maxScore: 300, color: '#ff6b6b', bg: 'sunset', reward: 300 },
+        { id: 'grandmaster', name: '🏆 استاد اعظم', minScore: 301, maxScore: 350, color: '#9b59b6', bg: 'night', reward: 400 },
+        { id: 'legend', name: '⭐ افسانه', minScore: 351, maxScore: 999999, color: '#f1c40f', bg: 'gold', reward: 500 }
+    ];
+    
+    function getLeagueByScore(score) {
+        for (let i = leagues.length - 1; i >= 0; i--) {
+            if (score >= leagues[i].minScore) {
+                return leagues[i];
+            }
+        }
+        return leagues[0];
+    }
+    
+    // ==================== متغیرهای بازی ====================
+    let gameMode = 'single';
+    let gameRunning = true;
+    let gameStarted = false;
+    let animationId = null;
+    
+    let currentUser = null;
+    let localScores = [];
+    let currentGameScore = 0;
+    let totalCoinsEarnedInGame = 0;
+    
+    let players = [];
+    let pipes = [];
+    let currentBg = localStorage.getItem('flappy_bg') || 'day';
+    
+    // فروشگاه
+    let ownedColors = [];
+    let ownedAccessories = [];
+    let currentBirdColor = '#3498db';
+    let currentAccessory = null;
+    
+    // رنگ‌ها
+    const shopColors = [
+        { id: 'blue', name: 'آبی کلاسیک', color: '#3498db', price: 0, default: true },
+        { id: 'red', name: 'قرمز آتشین', color: '#e74c3c', price: 50, default: false },
+        { id: 'green', name: 'سبز زمردی', color: '#2ecc71', price: 50, default: false },
+        { id: 'purple', name: 'بنفش سلطنتی', color: '#9b59b6', price: 80, default: false },
+        { id: 'orange', name: 'نارنجی شاد', color: '#f39c12', price: 80, default: false },
+        { id: 'pink', name: 'صورتی گلابی', color: '#fd79a8', price: 100, default: false },
+        { id: 'gold', name: 'طلایی', color: '#f1c40f', price: 150, default: false },
+        { id: 'cyan', name: 'فیروزه‌ای', color: '#1abc9c', price: 120, default: false },
+        { id: 'black', name: 'شب تار', color: '#2c3e50', price: 200, default: false },
+        { id: 'white', name: 'سفید برفی', color: '#ecf0f1', price: 180, default: false },
+        { id: 'crimson', name: 'زرشکی', color: '#dc143c', price: 160, default: false },
+        { id: 'teal', name: 'سبز آبی', color: '#008080', price: 140, default: false }
+    ];
+    
+    // اکسسوری‌ها
+    const shopAccessories = [
+        { id: null, name: 'بدون اکسسوری', icon: '🐦', price: 0, default: true, draw: () => {} },
+        { id: 'hat', name: 'کلاه کابوی', icon: '🤠', price: 40, default: false, draw: (ctx, x, y) => {
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(x-10, y-15, 20, 8);
+            ctx.fillRect(x-5, y-20, 10, 8);
+        }},
+        { id: 'crown', name: 'تاج سلطنتی', icon: '👑', price: 100, default: false, draw: (ctx, x, y) => {
+            ctx.fillStyle = '#f1c40f';
+            ctx.beginPath();
+            ctx.moveTo(x-8, y-15);
+            ctx.lineTo(x, y-25);
+            ctx.lineTo(x+8, y-15);
+            ctx.fill();
+        }},
+        { id: 'glasses', name: 'عینک آفتابی', icon: '😎', price: 60, default: false, draw: (ctx, x, y) => {
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(x-8, y-8, 18, 6);
+        }},
+        { id: 'mask', name: 'ماسک نینجا', icon: '🥷', price: 80, default: false, draw: (ctx, x, y) => {
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(x-6, y-8, 16, 8);
+        }},
+        { id: 'bowtie', name: 'پاپیون', icon: '🎀', price: 70, default: false, draw: (ctx, x, y) => {
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(x-8, y-10, 16, 4);
+            ctx.beginPath();
+            ctx.moveTo(x-8, y-10);
+            ctx.lineTo(x-12, y-15);
+            ctx.lineTo(x-4, y-11);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x+8, y-10);
+            ctx.lineTo(x+12, y-15);
+            ctx.lineTo(x+4, y-11);
+            ctx.fill();
+        }},
+        { id: 'monocle', name: 'مونوکل', icon: '👁️', price: 90, default: false, draw: (ctx, x, y) => {
+            ctx.beginPath();
+            ctx.arc(x+3, y-5, 6, 0, Math.PI * 2);
+            ctx.strokeStyle = 'gold';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(135,206,235,0.3)';
+            ctx.fill();
+        }},
+        { id: 'sword', name: 'شمشیر', icon: '⚔️', price: 120, default: false, draw: (ctx, x, y) => {
+            ctx.fillStyle = '#bdc3c7';
+            ctx.fillRect(x+12, y-5, 15, 3);
+            ctx.fillStyle = '#f39c12';
+            ctx.fillRect(x+25, y-7, 5, 7);
+        }},
+        { id: 'helmet', name: 'کلاه ایمنی', icon: '⛑️', price: 100, default: false, draw: (ctx, x, y) => {
+            ctx.fillStyle = '#e67e22';
+            ctx.beginPath();
+            ctx.arc(x, y-12, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#f39c12';
+            ctx.fillRect(x-3, y-18, 6, 8);
+        }},
+        { id: 'wings', name: 'بال فرشته', icon: '👼', price: 150, default: false, draw: (ctx, x, y) => {
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.beginPath();
+            ctx.moveTo(x-15, y-5);
+            ctx.quadraticCurveTo(x-20, y-12, x-10, y-10);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x+15, y-5);
+            ctx.quadraticCurveTo(x+20, y-12, x+10, y-10);
+            ctx.fill();
+        }}
+    ];
+    
+    const randomColors = ['#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#3498db', '#fd79a8', '#00cec9'];
+    
+    // ==================== به‌روزرسانی لیگ و پروفایل ====================
+    function updateUserLeagueAndStats() {
+        if (!currentUser) return;
+        
+        let totalScore = currentUser.totalScore || 0;
+        let league = getLeagueByScore(totalScore);
+        
+        document.getElementById('userHighScore').innerHTML = currentUser.highScore || 0;
+        document.getElementById('userCoinsProfile').innerHTML = currentUser.coins || 0;
+        document.getElementById('userTotalScore').innerHTML = totalScore;
+        document.getElementById('leagueBadge').innerHTML = league.name;
+        document.getElementById('leagueBadge').style.background = `linear-gradient(135deg, ${league.color}, ${league.color}80)`;
+    }
+    
+    function checkLeagueUpgrade(oldTotalScore, newTotalScore) {
+        let oldLeague = getLeagueByScore(oldTotalScore);
+        let newLeague = getLeagueByScore(newTotalScore);
+        
+        if (oldLeague.id !== newLeague.id && newTotalScore > oldTotalScore) {
+            let reward = newLeague.reward;
+            currentUser.coins = (currentUser.coins || 0) + reward;
+            
+            showRewardMessage(`🎉 تبریک! به لیگ ${newLeague.name} صعود کردی! 🎉\n💰 ${reward} سکه پاداش گرفتی!`);
+            
+            if (newLeague.bg) {
+                setBackground(newLeague.bg);
+            }
+            
+            saveUserData();
+            updateUserLeagueAndStats();
+            document.getElementById('shopCoins').innerText = currentUser.coins;
+        }
+    }
+    
+    function showRewardMessage(msg) {
+        const el = document.getElementById('rewardMessage');
+        el.innerHTML = msg;
+        el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 4000);
+    }
+    
+    // ==================== لیدربورد محلی ====================
+    function loadLocalScores() {
+        let saved = localStorage.getItem('flappy_local_scores_fixed');
+        if (saved) {
+            localScores = JSON.parse(saved);
+        } else {
+            localScores = [];
+        }
+        localScores.sort((a, b) => b.score - a.score);
+        updateLocalLeaderboard();
+    }
+    
+    function saveLocalScores() {
+        localStorage.setItem('flappy_local_scores_fixed', JSON.stringify(localScores));
+    }
+    
+    function updateLocalLeaderboard() {
+        const list = document.getElementById('localLeaderboardList');
+        if (localScores.length === 0) {
+            list.innerHTML = '<li style="justify-content:center">هنوز امتیازی ثبت نشده</li>';
+            return;
+        }
+        list.innerHTML = '';
+        localScores.slice(0, 10).forEach((item, idx) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${idx+1}. ${item.name}</span> <span>🎯 ${item.score}</span>`;
+            list.appendChild(li);
+        });
+    }
+    
+    function saveLocalScore() {
+        let name = document.getElementById('saveScoreName').value.trim();
+        if (!name) {
+            alert('لطفاً نام خود را وارد کنید!');
+            return;
+        }
+        let bestScore = currentUser?.highScore || 0;
+        if (bestScore === 0) {
+            alert('شما هنوز امتیازی در بازی تک نفره کسب نکرده‌اید!');
+            return;
+        }
+        
+        let existingIndex = localScores.findIndex(s => s.name === name);
+        
+        if (existingIndex !== -1) {
+            if (bestScore > localScores[existingIndex].score) {
+                localScores[existingIndex].score = bestScore;
+                alert(`✅ امتیاز شما از ${localScores[existingIndex].score} به ${bestScore} ارتقا یافت!`);
+            } else {
+                alert(`امتیاز فعلی شما (${localScores[existingIndex].score}) بالاتر از امتیاز جدید است.`);
+                return;
+            }
+        } else {
+            localScores.push({ name: name, score: bestScore });
+            alert(`✅ امتیاز ${bestScore} برای ${name} ذخیره شد!`);
+        }
+        
+        localScores.sort((a, b) => b.score - a.score);
+        saveLocalScores();
+        updateLocalLeaderboard();
+    }
+    
+    // ==================== اضافه کردن سکه ====================
+    function addCoinsForScore(scoreIncrease) {
+        if (gameMode !== 'single') return;
+        
+        let coinsToAdd = scoreIncrease;
+        totalCoinsEarnedInGame += coinsToAdd;
+        
+        if (currentUser) {
+            currentUser.coins = (currentUser.coins || 0) + coinsToAdd;
+            document.getElementById('shopCoins').innerText = currentUser.coins;
+            saveUserData();
+            updateUserLeagueAndStats();
+        }
+        
+        showCoinAnimation(coinsToAdd);
+    }
+    
+    function showCoinAnimation(amount) {
+        const coinMsg = document.createElement('div');
+        coinMsg.innerText = `+${amount} 🪙`;
+        coinMsg.style.position = 'fixed';
+        coinMsg.style.bottom = '100px';
+        coinMsg.style.right = '20px';
+        coinMsg.style.backgroundColor = '#f39c12';
+        coinMsg.style.color = 'white';
+        coinMsg.style.padding = '5px 15px';
+        coinMsg.style.borderRadius = '30px';
+        coinMsg.style.fontWeight = 'bold';
+        coinMsg.style.zIndex = '1000';
+        coinMsg.style.animation = 'bounce 0.5s ease';
+        document.body.appendChild(coinMsg);
+        setTimeout(() => coinMsg.remove(), 1000);
+    }
+    
+    // ==================== بارگذاری اطلاعات کاربر ====================
+    function loadUserData() {
+        let saved = localStorage.getItem('flappy_currentUser');
+        if (saved) {
+            currentUser = JSON.parse(saved);
+            if (currentUser.totalScore === undefined) currentUser.totalScore = 0;
+            if (currentUser.highScore === undefined) currentUser.highScore = 0;
+            if (currentUser.coins === undefined) currentUser.coins = 100;
+            document.getElementById('shopCoins').innerText = currentUser.coins || 0;
+            ownedColors = currentUser.ownedColors || ['blue'];
+            ownedAccessories = currentUser.ownedAccessories || [];
+            currentBirdColor = currentUser.birdColor || '#3498db';
+            currentAccessory = currentUser.accessory || null;
+            updateUserLeagueAndStats();
+        }
+    }
+    
+    function saveUserData() {
+        if (currentUser) {
+            currentUser.coins = parseInt(document.getElementById('shopCoins').innerText) || currentUser.coins;
+            currentUser.ownedColors = ownedColors;
+            currentUser.ownedAccessories = ownedAccessories;
+            currentUser.birdColor = currentBirdColor;
+            currentUser.accessory = currentAccessory;
+            localStorage.setItem('flappy_currentUser', JSON.stringify(currentUser));
+            
+            let users = JSON.parse(localStorage.getItem('flappy_users') || '[]');
+            let idx = users.findIndex(u => u.username === currentUser.username);
+            if (idx !== -1) {
+                users[idx] = currentUser;
+                localStorage.setItem('flappy_users', JSON.stringify(users));
+            }
+        }
+    }
+    
+    function getRandomColor(index) {
+        return randomColors[index % randomColors.length];
+    }
+    
+    // ==================== پس زمینه ====================
+    function setBackground(bg) {
+        currentBg = bg;
+        localStorage.setItem('flappy_bg', bg);
+        document.querySelectorAll('.bg-option').forEach(opt => {
+            if (opt.getAttribute('data-bg') === bg) {
+                opt.classList.add('selected');
+            } else {
+                opt.classList.remove('selected');
+            }
+        });
+    }
+    
+    function getBackgroundGradient() {
+        const gradients = {
+            day: ['#4A90E2', '#7FDBDA'],
+            night: ['#0a0a2a', '#1a1a3e'],
+            sunset: ['#e74c3c', '#f39c12'],
+            forest: ['#1e8449', '#2ecc71'],
+            gold: ['#f1c40f', '#f39c12']
+        };
+        const colors = gradients[currentBg] || gradients.day;
+        const grad = ctx.createLinearGradient(0, 0, 0, H);
+        grad.addColorStop(0, colors[0]);
+        grad.addColorStop(1, colors[1]);
+        return grad;
+    }
+    
+    // ==================== توابع بازی ====================
+    function initGame() {
+        gameRunning = true;
+        gameStarted = false;
+        currentGameScore = 0;
+        totalCoinsEarnedInGame = 0;
+        pipes = [];
+        for (let i = 0; i < 4; i++) addPipe();
+        
+        const configs = {
+            single: [{ name: 'بازیکن', key: 'Space', x: 80 }],
+            multi2: [
+                { name: 'بازیکن 1', key: 'Space', x: 70 },
+                { name: 'بازیکن 2', key: 'KeyA', x: 130 }
+            ],
+            multi3: [
+                { name: 'بازیکن 1', key: 'Space', x: 60 },
+                { name: 'بازیکن 2', key: 'KeyA', x: 120 },
+                { name: 'بازیکن 3', key: 'KeyS', x: 180 }
+            ],
+            multi4: [
+                { name: 'بازیکن 1', key: 'Space', x: 50 },
+                { name: 'بازیکن 2', key: 'KeyA', x: 110 },
+                { name: 'بازیکن 3', key: 'KeyS', x: 170 },
+                { name: 'بازیکن 4', key: 'KeyD', x: 230 }
+            ]
+        };
+        
+        players = [];
+        const config = configs[gameMode];
+        for (let i = 0; i < config.length; i++) {
+            let color;
+            if (gameMode === 'single') {
+                color = currentBirdColor;
+            } else {
+                color = getRandomColor(i);
+            }
+            players.push({
+                id: i,
+                name: config[i].name,
+                x: config[i].x,
+                y: H / 2,
+                vy: 0,
+                rotation: 0,
+                score: 0,
+                alive: true,
+                color: color,
+                key: config[i].key,
+                lastScore: 0
+            });
+        }
+        
+        updateScorePanel();
+        updateControlsInfo();
+    }
+    
+    function addPipe() {
+        const minTop = 55;
+        const maxTop = GROUND_Y - PIPE_GAP - 55;
+        const topHeight = Math.floor(Math.random() * (maxTop - minTop + 1) + minTop);
+        let lastX = pipes.length > 0 ? pipes[pipes.length - 1].x : W;
+        pipes.push({
+            x: lastX + PIPE_SPACING,
+            topHeight: topHeight,
+            bottomY: topHeight + PIPE_GAP,
+            passed: false
+        });
+    }
+    
+    function updateGame() {
+        if (!gameRunning || !gameStarted) return;
+        
+        for (let i = 0; i < pipes.length; i++) {
+            pipes[i].x -= PIPE_SPEED;
+            if (pipes[i].x + PIPE_W < 0) {
+                pipes.splice(i, 1);
+                i--;
+                addPipe();
+            }
+        }
+        
+        let anyAlive = false;
+        for (let p of players) {
+            if (!p.alive) continue;
+            anyAlive = true;
+            
+            p.vy += GRAVITY;
+            p.y += p.vy;
+            if (p.vy > 0) p.rotation = Math.min(p.rotation + 0.05, 1.2);
+            else p.rotation = Math.max(p.rotation - 0.05, -0.6);
+            
+            if (p.y + 20 >= GROUND_Y || p.y <= 0) {
+                p.alive = false;
+                continue;
+            }
+            
+            for (let pipe of pipes) {
+                if (!pipe.passed && pipe.x + PIPE_W < p.x) {
+                    pipe.passed = true;
+                    p.score++;
+                    
+                    if (gameMode === 'single') {
+                        let increase = p.score - p.lastScore;
+                        p.lastScore = p.score;
+                        currentGameScore = p.score;
+                        addCoinsForScore(increase);
+                    }
+                    updateScorePanel();
+                }
+                
+                if (p.x + 28 > pipe.x && p.x < pipe.x + PIPE_W) {
+                    if (p.y < pipe.topHeight || p.y + 20 > pipe.bottomY) {
+                        p.alive = false;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (!anyAlive) {
+            gameRunning = false;
+            gameStarted = false;
+            
+            if (gameMode === 'single' && currentGameScore > 0 && currentUser) {
+                // اضافه کردن به مجموع کل
+                let oldTotalScore = currentUser.totalScore || 0;
+                let newTotalScore = oldTotalScore + currentGameScore;
+                currentUser.totalScore = newTotalScore;
+                
+                // بروزرسانی بهترین امتیاز
+                if (currentGameScore > (currentUser.highScore || 0)) {
+                    currentUser.highScore = currentGameScore;
+                }
+                
+                // بررسی ارتقای لیگ
+                checkLeagueUpgrade(oldTotalScore, newTotalScore);
+                
+                saveUserData();
+                updateUserLeagueAndStats();
+                document.getElementById('shopCoins').innerText = currentUser.coins;
+            }
+            
+            if (gameMode !== 'single') {
+                let winner = players.reduce((best, p) => p.score > best.score ? p : best, players[0]);
+                showWinnerMessage(`${winner.name} برنده شد! با ${winner.score} امتیاز`);
+            } else {
+                updateScorePanel();
+            }
+        }
+    }
+    
+    function showWinnerMessage(msg) {
+        const el = document.getElementById('winnerMessage');
+        el.innerHTML = `🏆 ${msg} 🏆`;
+        el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 3000);
+    }
+    
+    function jump(playerId) {
+        if (!gameRunning) return;
+        if (!gameStarted) gameStarted = true;
+        if (players[playerId] && players[playerId].alive) {
+            players[playerId].vy = JUMP_POWER;
+            players[playerId].rotation = -0.4;
+        }
+    }
+    
+    function updateScorePanel() {
+        const panel = document.getElementById('scorePanel');
+        if (gameMode === 'single') {
+            panel.innerHTML = `<span>🎯 امتیاز: ${currentGameScore}</span>`;
+        } else {
+            let html = '';
+            for (let p of players) {
+                html += `<span style="color:${p.color}">${p.alive ? '🐦' : '💀'} ${p.name}: ${p.score}</span>`;
+            }
+            panel.innerHTML = html;
+        }
+    }
+    
+    function updateControlsInfo() {
+        const info = document.getElementById('controlsInfo');
+        if (gameMode === 'single') {
+            info.innerHTML = '🖱️ کلیک موس یا Space برای پرواز';
+        } else {
+            let text = '🎮 ';
+            for (let p of players) {
+                const keyName = p.key === 'Space' ? 'Space' : p.key.replace('Key', '');
+                text += `${p.name}: ${keyName} | `;
+            }
+            text += 'برای پرواز';
+            info.innerHTML = text;
+        }
+    }
+    
+    // ==================== رسم ====================
+    function drawBackground() {
+        ctx.fillStyle = getBackgroundGradient();
+        ctx.fillRect(0, 0, W, H);
+        
+        if (currentBg === 'night') {
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            const stars = [
+                [50, 30], [120, 80], [200, 40], [280, 90], [350, 20], [420, 70],
+                [80, 150], [180, 120], [300, 160], [400, 130], [450, 180],
+                [30, 250], [150, 280], [250, 230], [370, 270], [480, 220],
+                [60, 350], [190, 380], [310, 340], [430, 390], [490, 360],
+                [100, 450], [220, 420], [340, 460], [460, 440]
+            ];
+            for (let star of stars) {
+                ctx.beginPath();
+                ctx.arc(star[0], star[1], Math.random() * 2 + 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        drawCloud(70, 70, 40);
+        drawCloud(380, 100, 45);
+        drawCloud(200, 50, 35);
+    }
+    
+    function drawCloud(x, y, size) {
+        ctx.beginPath();
+        ctx.arc(x, y, size * 0.6, 0, Math.PI * 2);
+        ctx.arc(x + size * 0.5, y - size * 0.2, size * 0.5, 0, Math.PI * 2);
+        ctx.arc(x - size * 0.3, y - size * 0.15, size * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    function drawPipes() {
+        for (const pipe of pipes) {
+            ctx.fillStyle = '#2E7D32';
+            ctx.fillRect(pipe.x, 0, PIPE_W, pipe.topHeight);
+            ctx.fillStyle = '#1B5E20';
+            ctx.fillRect(pipe.x - 3, pipe.topHeight - 25, PIPE_W + 6, 25);
+            
+            ctx.fillStyle = '#2E7D32';
+            ctx.fillRect(pipe.x, pipe.bottomY, PIPE_W, H - pipe.bottomY);
+            ctx.fillStyle = '#1B5E20';
+            ctx.fillRect(pipe.x - 3, pipe.bottomY, PIPE_W + 6, 25);
+        }
+    }
+    
+    function drawBird(player) {
+        ctx.save();
+        ctx.translate(player.x + 14, player.y + 10);
+        if (player.alive) ctx.rotate(player.rotation);
+        
+        ctx.fillStyle = player.color;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 14, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = player.color;
+        ctx.beginPath();
+        ctx.ellipse(-6, -2, 8, 5, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(5, -3, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#1a1a2e';
+        ctx.beginPath();
+        ctx.arc(6, -4, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = '#E67E22';
+        ctx.beginPath();
+        ctx.moveTo(10, -2);
+        ctx.lineTo(16, 0);
+        ctx.lineTo(10, 2);
+        ctx.fill();
+        
+        if (gameMode === 'single' && currentAccessory) {
+            const acc = shopAccessories.find(a => a.id === currentAccessory);
+            if (acc && acc.draw) acc.draw(ctx, 0, 0);
+        }
+        
+        ctx.restore();
+    }
+    
+    function drawGround() {
+        ctx.fillStyle = '#8B5A2B';
+        ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+        ctx.fillStyle = '#6B3E1A';
+        ctx.fillRect(0, GROUND_Y + 5, W, 5);
+        ctx.fillStyle = '#228B22';
+        ctx.fillRect(0, GROUND_Y - 3, W, 5);
+    }
+    
+    function drawMessages() {
+        if (!gameStarted && !gameRunning) {
+            ctx.font = 'bold 22px Tahoma';
+            ctx.fillStyle = 'white';
+            ctx.shadowBlur = 4;
+            ctx.fillText('🎮 شروع بازی', W/2 - 75, H/2 - 50);
+            ctx.font = '13px Tahoma';
+            ctx.fillText('کلیک کنید / Space', W/2 - 65, H/2);
+            ctx.shadowBlur = 0;
+        }
+        
+        if (!gameRunning && gameStarted) {
+            ctx.font = 'bold 28px Tahoma';
+            ctx.fillStyle = '#e74c3c';
+            ctx.shadowBlur = 4;
+            ctx.fillText('GAME OVER', W/2 - 95, H/2 - 50);
+            ctx.font = '16px Tahoma';
+            ctx.fillStyle = 'white';
+            
+            if (gameMode === 'single') {
+                ctx.fillText('امتیاز: ' + currentGameScore, W/2 - 50, H/2);
+                ctx.fillText('+' + totalCoinsEarnedInGame + ' سکه', W/2 - 40, H/2 + 40);
+            } else {
+                let winner = players.reduce((best, p) => p.score > best.score ? p : best, players[0]);
+                ctx.fillText('برنده: ' + winner.name + ' | ' + winner.score + ' امتیاز', W/2 - 130, H/2);
+            }
+            ctx.shadowBlur = 0;
+        }
+        
+        if (gameMode === 'single' && gameStarted && gameRunning) {
+            ctx.font = 'bold 40px Tahoma';
+            ctx.fillStyle = 'white';
+            ctx.shadowBlur = 3;
+            ctx.fillText(currentGameScore, W/2 - 15, 60);
+            ctx.shadowBlur = 0;
+        }
+    }
+    
+    function draw() {
+        drawBackground();
+        drawPipes();
+        drawGround();
+        for (let p of players) drawBird(p);
+        drawMessages();
+    }
+    
+    // ==================== حلقه بازی ====================
+    function gameLoop() {
+        updateGame();
+        draw();
+        animationId = requestAnimationFrame(gameLoop);
+    }
+    
+    // ==================== فروشگاه ====================
+    function updateShopUI() {
+        const colorShop = document.getElementById('colorShop');
+        colorShop.innerHTML = '';
+        shopColors.forEach(color => {
+            const owned = ownedColors.includes(color.id) || color.default;
+            colorShop.innerHTML += `
+                <div class="shop-item">
+                    <div class="color-preview" style="background: ${color.color}"></div>
+                    <div>${color.name}</div>
+                    <div>💰 ${color.price} سکه</div>
+                    ${owned ? 
+                        `<button onclick="equipColor('${color.id}', '${color.color}')">✨ تجهیز</button>
+                         ${currentBirdColor === color.color ? '<div class="equipped-badge">✓ تجهیز شده</div>' : ''}` :
+                        `<button onclick="buyColor('${color.id}', '${color.color}', ${color.price})">🛒 خرید</button>`
+                    }
+                </div>
+            `;
+        });
+        
+        const accessoryShop = document.getElementById('accessoryShop');
+        accessoryShop.innerHTML = '';
+        shopAccessories.forEach(acc => {
+            const owned = ownedAccessories.includes(acc.id) || acc.default;
+            accessoryShop.innerHTML += `
+                <div class="shop-item">
+                    <div style="font-size: 40px;">${acc.icon}</div>
+                    <div>${acc.name}</div>
+                    <div>💰 ${acc.price} سکه</div>
+                    ${owned ? 
+                        `<button onclick="equipAccessory('${acc.id}')">✨ تجهیز</button>
+                         ${currentAccessory === acc.id ? '<div class="equipped-badge">✓ تجهیز شده</div>' : ''}` :
+                        `<button onclick="buyAccessory('${acc.id}', ${acc.price})">🛒 خرید</button>`
+                    }
+                </div>
+            `;
+        });
+    }
+    
+    function buyColor(id, color, price) {
+        let coins = parseInt(document.getElementById('shopCoins').innerText);
+        if (coins >= price) {
+            coins -= price;
+            document.getElementById('shopCoins').innerText = coins;
+            ownedColors.push(id);
+            saveUserData();
+            updateShopUI();
+            updateUserLeagueAndStats();
+            alert(`✅ ${shopColors.find(c => c.id === id).name} خریداری شد!`);
+        } else {
+            alert('❌ سکه کافی نیست! با بازی کردن سکه جمع کن.');
+        }
+    }
+    
+    function equipColor(id, color) {
+        currentBirdColor = color;
+        saveUserData();
+        updateShopUI();
+        if (gameMode === 'single' && players[0]) players[0].color = color;
+        alert(`✨ رنگ ${shopColors.find(c => c.id === id).name} تجهیز شد!`);
+    }
+    
+    function buyAccessory(id, price) {
+        let coins = parseInt(document.getElementById('shopCoins').innerText);
+        if (coins >= price) {
+            coins -= price;
+            document.getElementById('shopCoins').innerText = coins;
+            ownedAccessories.push(id);
+            saveUserData();
+            updateShopUI();
+            updateUserLeagueAndStats();
+            alert(`✅ ${shopAccessories.find(a => a.id === id).name} خریداری شد!`);
+        } else {
+            alert('❌ سکه کافی نیست!');
+        }
+    }
+    
+    function equipAccessory(id) {
+        currentAccessory = id;
+        saveUserData();
+        updateShopUI();
+        alert(`✨ اکسسوری ${shopAccessories.find(a => a.id === id).name} تجهیز شد!`);
+    }
+    
+    // ==================== تب‌ها و راهنما ====================
+    function showTab(tab) {
+        document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        
+        if (tab === 'game') {
+            document.getElementById('gameTab').classList.add('active');
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        } else if (tab === 'shop') {
+            document.getElementById('shopTab').classList.add('active');
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            updateShopUI();
+        } else if (tab === 'leaderboard') {
+            document.getElementById('leaderboardTab').classList.add('active');
+            document.querySelectorAll('.tab-btn')[2].classList.add('active');
+            updateLocalLeaderboard();
+        } else if (tab === 'help') {
+            document.getElementById('helpTab').classList.add('active');
+            document.querySelectorAll('.tab-btn')[3].classList.add('active');
+            renderLeagueHelp();
+        }
+    }
+    
+    function renderLeagueHelp() {
+        const container = document.getElementById('leagueHelpList');
+        container.innerHTML = '';
+        leagues.forEach(league => {
+            const span = document.createElement('span');
+            span.className = 'league-help-item';
+            span.style.background = `linear-gradient(135deg, ${league.color}, ${league.color}80)`;
+            span.innerHTML = `${league.name}: ${league.minScore}+`;
+            container.appendChild(span);
+        });
+    }
+    
+    function setMode(mode) {
+        gameMode = mode;
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            if (btn.getAttribute('data-mode') === mode) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        initGame();
+    }
+    
+    function backToHub() {
+        if (animationId) cancelAnimationFrame(animationId);
+        window.location.href = 'main.html';
+    }
+    
+    // ==================== مقداردهی اولیه ====================
+    loadUserData();
+    loadLocalScores();
+    initGame();
+    gameLoop();
+    renderLeagueHelp();
+    
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => setMode(btn.getAttribute('data-mode')));
+    });
+    
+    document.querySelectorAll('.bg-option').forEach(opt => {
+        opt.addEventListener('click', () => setBackground(opt.getAttribute('data-bg')));
+    });
+    
+    document.addEventListener('keydown', (e) => {
+        const code = e.code;
+        if (gameMode === 'single') {
+            if (code === 'Space') { e.preventDefault(); jump(0); }
+        } else {
+            for (let i = 0; i < players.length; i++) {
+                if (code === players[i].key) { e.preventDefault(); jump(i); }
+            }
+        }
+    });
+    
+    canvas.addEventListener('click', () => { if (gameMode === 'single') jump(0); });
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if (gameMode === 'single') jump(0); });
+    
+    setBackground(currentBg);
+    updateShopUI();
+    
+    window.showTab = showTab;
+    window.setMode = setMode;
+    window.backToHub = backToHub;
+    window.saveLocalScore = saveLocalScore;
+    window.buyColor = buyColor;
+    window.equipColor = equipColor;
+    window.buyAccessory = buyAccessory;
+    window.equipAccessory = equipAccessory;
+</script>
+
+</body>
+</html>
